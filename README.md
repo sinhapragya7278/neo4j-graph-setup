@@ -1,61 +1,98 @@
-# Neo4j Knowledge Graph – Docker Setup
 
-This repository contains a Dockerized setup to deploy a Neo4j knowledge graph using CSV files for nodes and relationships.
+# 📊 Neo4j Graph Setup via Docker + CSV
 
----ls
+This project sets up a **Neo4j knowledge graph** using Docker and loads graph data from CSV files. It's ideal for quick testing, POCs, or handing off to teams like MCP for further integration.
 
+---
 
-## 📦 Project Structure
+## 📁 Folder Structure
 
 ```
-neo4j-kg-docker-setup/
-├── docker-compose.yml
-├── .env
-├── init.cypher
+neo4j-graph-setup/
+├── docker-compose.yml       # Spins up Neo4j with plugins and config
+├── Dockerfile               # Builds custom Neo4j image (optional use)
+├── init.sh                  # (Legacy) Cypher load script, not auto-run
+├── load_graph.sh            # ✅ Main script to manually load CSV graph data
 ├── import/
-│   ├── nodes_1.csv
-│   └── edges_1.csv
+│   ├── nodes.csv            # Nodes file with `~id`, `~label`, etc.
+│   └── edges.csv            # Edges file with `~from`, `~to`, etc.
+└── README.md
 ```
 
 ---
 
-## 🛠 Requirements
+## 🚀 Quick Start
 
-- Docker installed (locally or on your server)
-- Git installed (optional if using ZIP)
-
----
-
-## 🚀 Steps to Run
-
+### 1. Start the Neo4j container
 ```bash
-git clone https://github.com/sinhapragya7278/neo4j-kg-docker-setup.git
-cd neo4j-kg-docker-setup
-docker-compose up -d
+docker compose up -d
 ```
 
-This will start a Neo4j container with your knowledge graph data loaded from `nodes_1.csv` and `edges_1.csv`.
+### 2. Load your CSV data into the graph
+```bash
+./load_graph.sh
+```
 
 ---
 
-## 🌐 Access Neo4j
+## 🔍 CSV Format
 
-- URL: [http://localhost:7474](http://localhost:7474)
-- Username: `neo4j`
-- Password: from `.env` file (e.g., `Neo4j123`)
+### ✅ `nodes.csv`
+| ~id                | ~label        | type           | community_summary | created               | updated               |
+|--------------------|---------------|----------------|--------------------|------------------------|------------------------|
+| `f9ct89lau6974d3`  | Loans and Credit Lines | business_unit | ...              | 2024-12-14T21:03:38Z | 2024-12-24T03:52:09Z |
+
+### ✅ `edges.csv`
+| ~from              | ~to              | ~label    | weight | created               | updated               |
+|--------------------|------------------|-----------|--------|------------------------|------------------------|
+| `8eg39oz345m8m91` | `v7lurh7vy44689w` | provides  | 1      | 2024-12-15T01:21:26Z | 2024-12-15T01:21:26Z |
 
 ---
 
-## 🧠 Query to Visualize the Graph
+## 🧪 Query Example
 
-Paste this in the Neo4j Browser to explore the graph:
+After loading, try this in [Neo4j Browser](http://localhost:7474):
 
 ```cypher
-MATCH (a)-[r]->(b) RETURN a, r, b LIMIT 50;
+MATCH (a:BusinessUnit)-[r:RELATED_TO]->(b:BusinessUnit)
+RETURN a, r, b LIMIT 25;
+```
+
+🧠 Login:
+- Username: `neo4j`
+- Password: `test@123`
+
+---
+
+## 🧼 Cleanup
+
+To stop and remove everything:
+```bash
+docker compose down -v
 ```
 
 ---
 
-## 📩 Questions?
+## 📦 Git Setup (optional for team use)
 
-Feel free to raise an issue in this repo or contact [@sinhapragya7278](https://github.com/sinhapragya7278).
+```bash
+git init
+git add .
+git commit -m "Initial Neo4j graph setup with Docker and CSV"
+git remote add origin https://github.com/YOUR_USERNAME/neo4j-graph-setup.git
+git push -u origin main
+```
+
+---
+
+## 👨‍💻 Author & Maintainer
+
+**Pragya Sinha**  
+Neo4j | Docker | Automation
+
+---
+
+## 📌 Notes
+- Don't run `init.sh` automatically — use `load_graph.sh` after container is up
+- CSV files must be placed inside the `/import` folder
+- If you modify the CSVs, just re-run `./load_graph.sh`
